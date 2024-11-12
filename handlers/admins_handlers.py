@@ -53,8 +53,16 @@ async def regenerate_verify_code_request(message: Message, bot: Bot, state: FSMC
 
 async def regenerate_verify_code_response(message: Message, bot: Bot, state: FSMContext):
     existed_player = await Player.get_or_none(nickname=message.text)
+    existed_judge = await Judge.get_or_none(judge_name=message.text)
     if existed_player is None:
         await message.answer("Игрок с таким ником не найден")
+    elif existed_judge is not None:
+        judge = await Judge.get(judge_name=message.text)
+        new_code = await generate_verification_code()
+        judge.verify_code = new_code
+        await judge.save()
+        await message.answer(f"Ник судьи: {message.text} \n"
+                             f"Новый код {new_code}")
     else:
         player = await Player.get(nickname=message.text)
         new_code = await generate_verification_code()
@@ -62,7 +70,7 @@ async def regenerate_verify_code_response(message: Message, bot: Bot, state: FSM
         await player.save()
         await message.answer(f"Ник игрока: {message.text} \n"
                              f"Новый код: {new_code}")
-        await state.set_state(MainStates.blank)
+    await state.set_state(MainStates.blank)
 
 
 async def help_command(message: Message, bot: Bot, state: FSMContext):

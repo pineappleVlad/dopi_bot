@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  bot:
+    build:
+      context: .
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: "db"
+      DB_PORT: "5432"
+      TOKEN: ${TOKEN}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16.2-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DB_USERNAME} -d ${DB_NAME}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+volumes:
+  postgres_data:

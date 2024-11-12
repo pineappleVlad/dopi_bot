@@ -18,8 +18,8 @@ class TournamentDbSaver:
         if tournament is None:
             tournament = await Tournament.create(tournament_name=tournament_name, url=url)
             await tournament.save()
+        current_tour_num = 1
         for current_tour in tournament_list:
-            current_tour_num = 1
             for game in current_tour:
                 existed_judge = await Judge.get_or_none(judge_name=game['referee'])
                 if existed_judge is None:
@@ -115,4 +115,3 @@ class TournamentDbSaver:
         await Tournament.all().delete()
         await Game.all().delete()
         await GamePlayer.all().delete()
-
