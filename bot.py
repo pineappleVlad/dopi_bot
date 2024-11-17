@@ -19,7 +19,7 @@ async def main():
     dp = Dispatcher()
 
     await Tortoise.init(config=TORTOISE_ORM)
-    # await TournamentDbSaver.clear_tables()
+    await TournamentDbSaver.clear_tables()
     await Tortoise.generate_schemas()
 
     dp.message.register(start, Command('start'))
