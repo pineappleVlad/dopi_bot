@@ -13,30 +13,39 @@ class TournamentDbSaver:
     @staticmethod
     async def save_seating_to_db(url: str):
         url = await TournamentDbSaver.format_url(url)
+        print("1")
         tournament_list, tournament_name = await TournamentDbSaver._parse_url(url)
+        print("2")
         tournament = await Tournament.get_or_none(tournament_name=tournament_name)
+        print("3")
         if tournament is None:
             tournament = await Tournament.create(tournament_name=tournament_name, url=url)
             await tournament.save()
+            print(4)
         current_tour_num = 1
         for current_tour in tournament_list:
             for game in current_tour:
                 existed_judge = await Judge.get_or_none(judge_name=game['referee'])
+                print("5")
                 if existed_judge is None:
                     existed_judge = await Judge.create(judge_name=game['referee'])
                     await existed_judge.save()
+                    print("6")
                 saved_game = await Game.create(game_num=current_tour_num, judge=existed_judge,
                                                tournament=tournament)
                 await saved_game.save()
+                print("6")
                 slot_counter = 1
                 for player in game["players"]:
                     saved_player = await Player.get_or_none(nickname=player)
                     if saved_player is None:
                         saved_player = await Player.create(nickname=player)
                         await saved_player.save()
+                        print("7")
                     saved_game_in_between_tables = await GamePlayer.create(game=saved_game, player=saved_player,
                                                                            player_slot=slot_counter)
                     await saved_game_in_between_tables.save()
+                    print("8")
                     slot_counter += 1
             current_tour_num += 1
 
@@ -54,15 +63,19 @@ class TournamentDbSaver:
     @staticmethod
     async def _parse_url(url: str):
         response = await TournamentDbSaver._get_request(url)
+        print("9")
         soup = BeautifulSoup(response, 'html.parser')
         nicknames_list = soup.find_all('div', class_='d-flex')[1:]
+        print("10")
         result_list = await TournamentDbSaver._format_data(nicknames_list)
         tournament_name = soup.find('div', class_='_tid__tournament__top-left-title__kWFFR').text
+        print("11")
         return result_list, tournament_name
 
     @staticmethod
     async def format_url(url: str) -> str:
         parsed_url = urlparse(url)
+        print("12")
         query_params = parse_qs(parsed_url.query)
         if 'tab' not in query_params:
             new_query = urlencode({**query_params, 'tab': 'games'})

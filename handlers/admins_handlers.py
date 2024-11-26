@@ -7,6 +7,7 @@ from database.db_settings import BaseSettings
 from config import ADMINS_IDS
 from database.models import Player, Tournament, Judge
 from utils.states import MainStates
+import logging
 
 
 async def create_tournament_admin(message: Message, bot: Bot, state: FSMContext):
@@ -22,7 +23,7 @@ async def enter_tournament_url(message: Message, bot: Bot, state: FSMContext):
         await message.answer("Турнир успешно сохранен в базе")
         await state.set_state(MainStates.blank)
     except Exception as e:
-        print(f"ERROR TEXT: {e}")
+        logging.exception(f"ERROR TEXT: {e}")
         await message.answer("Произошла ошибка, возможно ссылка не корректна")
 
 
